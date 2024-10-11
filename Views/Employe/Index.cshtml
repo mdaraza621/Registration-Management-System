@@ -1,0 +1,353 @@
+﻿
+@{
+    ViewBag.Title = "Index";
+}
+
+<h2>Index</h2>
+<table>
+    <tr>
+        <td>Name :</td>
+        <td><input type="text" id="txtname" /></td>
+    </tr>
+
+    <tr>
+        <td>City :</td>
+        <td><input type="text" id="txtcity" /></td>
+    </tr>
+
+    <tr>
+        <td>Mobile :</td>
+        <td><input type="text" id="txtmobile" /></td>
+    </tr>
+
+    <tr>
+        <td>Age :</td>
+        <td><input type="text" id="txtage" /></td>
+    </tr>
+
+
+    <tr>
+        <td>Country :</td>
+        <td>
+            <select id="ddlcountry" onchange="ShowState()">
+                <option value="0">--select--</option>
+            </select>
+        </td>
+    </tr>
+
+    <tr>
+        <td>State :</td>
+        <td>
+            <select id="ddlstate">
+                <option value="0">--select--</option>
+            </select>
+        </td>
+    </tr>
+
+
+    <tr>
+
+        <td>
+           <input type="button" id="btninsert" value="Save" onclick="validation()" />
+        </td>
+    </tr>
+</table>
+  
+<table>
+    <tr>
+        
+        <td>
+            <select id="ddlcolumns">
+                <option value="0">--select--</option>
+                <option value="1">--Id--</option>
+                <option value="2">--Name--</option>
+                <option value="3">--City--</option>
+                <option value="4">--Mobile--</option>
+                <option value="5">--Age--</option>
+            </select>
+            <input type="text" id="txtsearch" />
+            <input type="button" id="btnsearch" value="Search" onclick="SearchData()" />
+        </td>
+    </tr>
+</table>
+
+    <table id="tbl" border="1" style="background-color:lightseagreen;color:black;width:800px">
+        <tr style="background-color:darksalmon;height:30px">
+            <th>Employe Id</th>
+            <th>Employe Name</th>
+            <th>Employe City</th>
+            <th>Employe Mobile</th>
+            <th>Employe Age</th>
+            <th>Employe Country</th>
+            <th>Employe State</th>
+            <th></th>
+            <th></th>
+        </tr>
+    </table>
+
+
+    <script src="~/Scripts/jquery-3.4.1.min.js"></script>
+    <script type="text/javascript">
+
+ 
+
+        var IDDD = 0;
+        $(document).ready(function () {
+            ShowData();
+            ShowCountry();
+        });   
+        
+
+        function validation() {
+            var dabba = "";
+            dabba += checkname();
+            dabba += checkcity();
+            dabba += checkmobile();
+            dabba += checkage();
+            if (dabba == "") {
+                SaveData();
+            }
+            else {
+                alert(dabba);
+            }
+        }
+
+        function checkname() {
+            var abc = /^[a-z,A-Z," "]*$/
+            if ($("#txtname").val() == "") {
+                return 'please enter your name !!\n';
+            }
+            else if (!abc.test($("#txtname").val())) {
+                return ' Name should be only alphabets !!\n';
+            }
+            else {
+                return "";
+            }
+        }
+
+        function checkcity() {
+            var abc = /^[a-z,A-Z," "]*$/
+            if ($("#txtcity").val() == "") {
+                return 'please enter your city !!\n';
+            }
+            else if (!abc.test($("#txtcity").val())) {
+                return 'Name should be only alphabet !!\n';
+            }
+           else {
+                return "";
+            }
+        }
+
+        function checkmobile() {
+            var abc=/^[0-9]*$/
+            if ($("#txtmobile").val() == "") {
+                return 'please enter your mobile number !!\n';
+            }
+            else if (!abc.test($("#txtmobile").val())) {
+                return 'Moile number should be only numeric !!\n';
+            }
+        
+            else {
+                return "";
+            }
+        }
+
+        function checkage() {
+            var abc = /^[0-9]*$/
+            if ($("#txtage").val() == "") {
+                return 'please enter your age !!\n';
+            }
+            else if (!abc.test($("#txtage").val())) {
+                return 'Age should be only numeric !!\n';
+            }
+            else if ($("#txtage").val() > 100) {
+                return 'Age should be less than or equal to 100 !!\n'
+            }
+            else {
+                return "";
+            }
+        }
+ 
+
+
+        function ShowCountry() {
+            $.ajax({
+                url: 'Employe/CountryGet',
+                type: 'post',
+                data: { },
+                success: function (data) {
+                    data = JSON.parse(data);
+                    if (data.length > 0) {
+                        
+                        for (var i = 0; i < data.length; i++) {
+                            $("#ddlcountry").append($('<option></option>').html(data[i].cname).val(data[i].cid));
+                        }
+                    }
+                    else {
+                        alert('Country record not found !!')
+                    }
+                },
+                error: function () {
+                    alert('record not found !!');
+                }
+            });
+        }
+
+        
+
+        function ShowState() {
+            $.ajax({
+                url: 'Employe/StateGet',
+                type: 'post',
+                data: { A: $("#ddlcountry").val() },
+                async: false,
+                success: function (data) {
+                    data = JSON.parse(data);
+                    if (data.length > 0) {
+                        $("#ddlstate").empty();
+                        $("#ddlstate").append($('<option></option>').html("--select--").val(0));
+                        for (var i = 0; i < data.length; i++) {
+                            $("#ddlstate").append($('<option></option>').html(data[i].sname).val(data[i].sid));
+                        }
+                    }
+                    else {
+                        alert('State record not found !!')
+                    }
+                },
+                error: function () {
+                    alert('Error in state bind!!');
+                }
+            });
+        }
+
+       
+
+        function SearchData() {
+            $.ajax({
+                url: 'Employe/EmployeSearch',
+                type: 'post',
+                data: { A: $("#txtsearch").val(), B: $("#ddlcolumns").val() },
+                success: function (data) {
+                    data = JSON.parse(data);
+                    if (data.length > 0) {
+                        $("#tbl").find("tr:gt(0)").remove();
+                        for (var i = 0; i < data.length; i++) {
+                            $("#tbl").append('<tr> <td>' + data[i].empid + '</td> <td>' + data[i].name + '</td> <td>' + data[i].city + '</td> <td>' + data[i].mobile + '</td> <td>' + data[i].age + '</td><td>' + data[i].cname + '</td><td>' + data[i].sname + '</td> <td style="color:blue"><input type="button" id="btndelete" value="Delete" onclick="DeleteData(' + data[i].empid + ')" /></td> </td> <td style="color:blue"><input type="button" id="btnedit" value="Edit" onclick="EditData(' + data[i].empid + ')" /></td>  </tr>');
+                        }
+                    }
+                    else {
+                        alert('record not found !!')
+                    }
+                },
+                error: function () {
+                    alert('record not found !!');
+                }
+            });
+        }
+
+
+        function ShowData() {
+            $.ajax({
+                url: 'Employe/EmployeGet',
+                type: 'post',
+                data: {  },
+                success: function (data) {
+                    data = JSON.parse(data);
+                    $("#tbl").find("tr:gt(0)").remove();
+                    for (var i = 0; i < data.length; i++) {
+                        $("#tbl").append('<tr> <td>' + data[i].empid + '</td> <td>' + data[i].name + '</td> <td>' + data[i].city + '</td> <td>' + data[i].mobile + '</td> <td>' + data[i].age + '</td><td>' + data[i].cname + '</td><td>' + data[i].sname + '</td> <td style="color:blue"><input type="button" id="btndelete" value="Delete" onclick="DeleteData(' + data[i].empid + ')" /> </td> <td style="color:blue"><input type="button" id="btnedit" value="Edit" onclick="EditData(' + data[i].empid + ')" /></td>  </tr>');
+                    }
+                },
+                error: function () {
+                    alert('record not found !!');
+                }
+            });
+        }
+
+        
+        function SaveData() {
+            if ($("#btninsert").val() == "Save") {
+                $.ajax({
+                    url: 'Employe/EmployeInsert',
+                    type: 'post',
+                    data: { Name: $("#txtname").val(), City: $("#txtcity").val(), Mobile: $("#txtmobile").val(), Age: $("#txtage").val(), Country: $("#ddlcountry").val(), State: $("#ddlstate").val() },
+                    success: function () {
+                        alert('Data has been saved !!');
+                        ShowData();
+                        Clear();
+                    },
+                    error: function () {
+                        alert('Data has not been saved !!');
+                    }
+                });
+            }
+            else if ($("#btninsert").val() == "Update") {
+                $.ajax({
+                    url: 'Employe/EmployeUpdate',
+                    type: 'post',
+                    data: { Id: IDDD, Name: $("#txtname").val(), City: $("#txtcity").val(), Mobile: $("#txtmobile").val(), Age: $("#txtage").val(), Country: $("#ddlcountry").val(), State: $("#ddlstate").val() },
+                    success: function () {
+                        alert('Data has been updated !!');
+                        ShowData();
+                        Clear();
+                    },
+                    error: function () {
+                        alert('Data has not been updated !!');
+                    }
+                });
+            }
+        }
+
+        function DeleteData(empid) {
+            $.ajax({
+                url: 'Employe/EmployeDelete',
+                type: 'post',
+                data: { A: empid },
+                success: function () {
+                    alert('Data has been deleted !!');
+                    ShowData();
+                },
+                error: function () {
+                    alert('Data has not been deleted !!');
+                }
+            });
+        }
+
+        function Clear() {
+            $("#txtname").val("");
+            $("#txtcity").val("");
+            $("#txtmobile").val("");
+            $("#txtage").val("");
+            $("#ddlcountry").val("0");
+            $("#ddlstate").val("0");
+            $("#btninsert").val("Save");
+            IDDD = 0;
+        }
+
+        function EditData(empid) {
+            $.ajax({
+                url: 'Employe/EmployeEdit',
+                type: 'post',
+                data: { A: empid },
+                async: false,
+                success: function (data) {
+                    data = JSON.parse(data);
+                    $("#txtname").val(data[0].name);
+                    $("#txtcity").val(data[0].city);
+                    $("#txtmobile").val(data[0].mobile);
+                    $("#txtage").val(data[0].age);
+                    $("#ddlcountry").val(data[0].country);
+                    ShowState();
+                    $("#ddlstate").val(data[0].state);
+
+                    $("#btninsert").val("Update");
+                    IDDD = empid;
+                },
+                error: function () {
+                    alert('Data has not been edited !!');
+                }
+            });
+        }
+
+       
+    </script>
